@@ -1,0 +1,77 @@
+# A7: Periodic clause-global token interaction on top of axial attention
+# 基于 SR(3-10) 小数据集
+
+model:
+  max_clauses: 50
+  max_vars: 10
+  embed_dim: 128
+  num_layers: 6
+  num_heads: 8
+  ffn_ratio: 4
+  dropout: 0.1
+  tau_init: 1.0
+  neg_samples: 512
+
+training:
+  batch_size: 32
+  num_epochs: 100
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  warmup_epochs: 5
+  gradient_clip: 1.0
+  accumulation_steps: 1
+
+  optimizer:
+    type: adamw
+    betas: [0.9, 0.999]
+    eps: 1e-8
+
+  scheduler:
+    type: cosine
+    min_lr: 1e-6
+
+  early_stopping:
+    patience: 10
+
+loss:
+  alpha_core: 0.1
+  alpha_neg: 0.1
+  sat_loss_config:
+    pos_weight: 1.0
+    label_smoothing: 0.0
+  clause_loss_config:
+    pos_weight: 6.0
+
+data:
+  num_workers: 8
+  pin_memory: true
+  augmentation:
+    enabled: true
+    variable_permutation: true
+    clause_permutation: true
+    polarity_flip_prob: 0.1
+  online_generation:
+    enabled: false
+
+logging:
+  log_dir: logs/ablation/A7_clause_global_token
+  checkpoint_dir: checkpoints/ablation/A7_clause_global_token
+  save_every: 5
+  log_every: 100
+  tensorboard: true
+
+device:
+  cuda: true
+  mixed_precision: true
+
+seed: 42
+
+ablation:
+  use_multichannel_vsm: true
+  use_negation: true
+  attention_type: axial
+  readout_type: semantic
+  use_polarity_offset: true
+  use_periodic_global_token: true
+  global_token_every_n_layers: 2
+  global_token_writeback_scale: 0.1

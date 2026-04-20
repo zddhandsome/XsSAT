@@ -1,0 +1,91 @@
+# GeoSATformer v2 Configuration - SR(40-100)
+# 大规模3-SAT实例，cv_ratio ≈ 4.26 (接近相变点)
+
+# 模型配置
+model:
+  max_clauses: 450          # ceil(100 * 4.26) + margin
+  max_vars: 100
+  embed_dim: 128
+  num_layers: 6             # 轴向注意力层数 L (每层 = row_attn + col_attn)
+  num_heads: 8
+  ffn_ratio: 4
+  dropout: 0.15             # 略增，大实例防过拟合
+  tau_init: 1.0
+  neg_samples: 1024       # 大实例literal更多，增大采样数
+  gradient_checkpoint: true  # 梯度检查点: 用计算换显存，允许更大batch
+
+# 训练配置
+training:
+  batch_size: 16           # 优化后提升batch_size (原为8, SDPA+动态截断释放大量显存)
+  num_epochs: 200
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  warmup_epochs: 10         # 更多warmup，稳定大规模训练
+  gradient_clip: 1.0
+  accumulation_steps: 6      # 6 GPUs: 6//6=1, eff_batch = 8×6×1 = 48 (匹配 Run 1)
+
+  optimizer:
+    type: adamw
+    betas: [0.9, 0.999]
+    eps: 1e-8
+
+  scheduler:
+    type: cosine
+    min_lr: 1e-6
+
+  early_stopping:
+    patience: 30            # 大实例训练更慢，给更多耐心
+
+# 损失函数配置
+loss:
+  alpha_core: 0.3           # 0.2→0.3, 大实例Core识别更重要
+  alpha_neg: 0.1
+
+  sat_loss_config:
+    pos_weight: 1.0
+    label_smoothing: 0.05   # 相变附近边界模糊，防止过度自信
+
+  clause_loss_config:
+    gamma: 2.0
+    alpha: 0.75
+
+# 数据配置
+data:
+  num_workers: 4
+  pin_memory: true
+
+  augmentation:
+    enabled: true
+    variable_permutation: true
+    clause_permutation: true
+    polarity_flip_prob: 0.1
+
+  online_generation:
+    enabled: true
+    mix_real: true
+    real_ratio: 0.5
+    epoch_size: 10000
+    min_vars: 40
+    max_vars_gen: 100
+    k: 3
+    cv_ratio_range: [4.0, 4.5]  # 聚焦相变附近
+    sat_ratio: 0.5
+    init_size: 6            # 大实例需要更大初始集
+    depth: 3                # 更深的resolution bloom
+    bloom_choice: 3         # 更多分支
+    pad_k: 3
+
+# 日志配置
+logging:
+  log_dir: logs/sr40_100
+  checkpoint_dir: checkpoints/sr40_100
+  save_every: 10
+  log_every: 50
+  tensorboard: true
+
+# 设备配置
+device:
+  cuda: true
+  mixed_precision: true
+
+seed: 42

@@ -1,0 +1,106 @@
+# SATLIB fine-tuning config for the sr40_60_vsm_plus checkpoint.
+
+model:
+  max_clauses: 360
+  max_vars: 80
+  embed_dim: 128
+  num_layers: 2
+  num_heads: 8
+  ffn_ratio: 4
+  dropout: 0.1
+  tau_init: 1.0
+  neg_samples: 512
+
+training:
+  batch_size: 8
+  num_epochs: 30
+  learning_rate: 3e-5
+  weight_decay: 1e-4
+  warmup_epochs: 3
+  gradient_clip: 1.0
+  accumulation_steps: 2
+  best_metric: val_balanced_accuracy
+
+  optimizer:
+    type: adam
+    betas: [0.9, 0.999]
+    eps: 1e-8
+
+  scheduler:
+    type: cosine
+    min_lr: 1e-6
+
+  early_stopping:
+    patience: 30
+
+loss:
+  alpha_core: 0.03
+  alpha_neg: 0.02
+  sat_loss_config:
+    pos_weight: 1.0
+    label_smoothing: 0.0
+  clause_loss_config:
+    pos_weight: 6.0
+
+data:
+  num_workers: 4
+  pin_memory: true
+
+  augmentation:
+    enabled: true
+    variable_permutation: true
+    clause_permutation: true
+    polarity_flip_prob: 0.05
+
+  online_generation:
+    enabled: false
+    mix_real: false
+    real_ratio: 0.5
+    epoch_size: 10000
+    min_vars: 3
+    max_vars_gen: 10
+    k: 3
+    cv_ratio_range: [4.0, 4.5]
+    sat_ratio: 0.5
+    init_size: 6
+    depth: 3
+    bloom_choice: 3
+    pad_k: 3
+
+logging:
+  log_dir: logs/satlib_sr10_40_vsm_plus_finetune
+  checkpoint_dir: checkpoints/satlib_sr10_40_vsm_plus_finetune
+  save_every: 5
+  log_every: 50
+  tensorboard: true
+
+device:
+  cuda: true
+  mixed_precision: true
+
+seed: 42
+
+ablation:
+  use_multichannel_vsm: true
+  use_negation: true
+  attention_type: axial
+  readout_type: hard_clause
+  use_polarity_offset: true
+
+  use_periodic_global_token: true
+  global_token_every_n_layers: 2
+  global_token_writeback_scale: 0.1
+
+  use_polarity_pair_mixer: true
+  pair_mixer_every_n_layers: 2
+  pair_mixer_writeback_scale: 0.1
+
+  hard_clause_topk_ratio: 0.1
+  hard_clause_min_topk: 8
+
+  use_structural_features: true
+  clause_short_threshold: 4
+
+  use_recurrent_axial: true
+  recurrent_steps: 6
+  recurrent_base_layers: 2

@@ -1,0 +1,51 @@
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Notebook and editor checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Local tooling / private workspace state
+.claude/
+.rollback/
+
+# Large generated assets and experiment artifacts
+data/
+checkpoints/
+logs/
+results/
+
+# Keep lightweight summary artifacts if needed
+!results/
+results/*
+!results/ablation/
+results/ablation/*
+!results/ablation/ablation_table.md
+!results/ablation/ablation_table.tex
+
+# Third-party reference PDFs
+reference/
+
+# Private or temporary paper materials
+Paper/.ipynb_checkpoints/
+Paper/recovered_from_trash/
+Paper/评审内容.txt
+Paper/IJCAI__ECAI_26_Formatting_Instructions__Copy_ (7).pdf
+
+# Local archives
+*.zip
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

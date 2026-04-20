@@ -1,0 +1,99 @@
+# XsSAT Configuration - SR(10-40)
+# 对应 data_test_10_40/*.pt (max_vars=40, max_clauses=195)
+
+model:
+  max_clauses: 360
+  max_vars: 40
+  embed_dim: 128
+  num_layers: 6
+  num_heads: 8
+  ffn_ratio: 4
+  dropout: 0.1
+  tau_init: 1.0
+  neg_samples: 512
+
+training:
+  batch_size: 16
+  num_epochs: 100
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  warmup_epochs: 5
+  gradient_clip: 1.0
+  accumulation_steps: 4
+  best_metric: val_balanced_accuracy
+
+  optimizer:
+    type: adamw
+    betas: [0.9, 0.999]
+    eps: 1e-8
+
+  scheduler:
+    type: cosine
+    min_lr: 1e-6
+
+  early_stopping:
+    patience: 9999
+
+loss:
+  alpha_core: 0.1
+  alpha_neg: 0.0
+  sat_loss_config:
+    pos_weight: 1.0
+    label_smoothing: 0.05
+  clause_loss_config:
+    pos_weight: 6.0
+
+data:
+  num_workers: 4
+  pin_memory: true
+
+  augmentation:
+    enabled: true
+    variable_permutation: false
+    clause_permutation: true
+    polarity_flip_prob: 0.1
+
+  online_generation:
+    enabled: false
+    mix_real: true
+    real_ratio: 0.5
+    epoch_size: 10000
+    min_vars: 3
+    max_vars_gen: 10
+    k: 3
+    cv_ratio_range: [4.0, 4.5]  # 聚焦相变附近
+    sat_ratio: 0.5
+    init_size: 6            # 大实例需要更大初始集
+    depth: 3                # 更深的resolution bloom
+    bloom_choice: 3         # 更多分支
+    pad_k: 3
+
+logging:
+  log_dir: logs/sr10_40
+  checkpoint_dir: checkpoints/sr10_40
+  save_every: 5
+  log_every: 100
+  tensorboard: true
+
+device:
+  cuda: true
+  mixed_precision: true
+
+seed: 42
+
+ablation:
+  use_multichannel_vsm: true
+  use_negation: false
+  attention_type: axial
+  # readout_type: semantic
+  use_polarity_offset: true
+  use_periodic_global_token: true
+  global_token_every_n_layers: 3
+  global_token_writeback_scale: 0.1
+
+  use_polarity_pair_mixer: true
+  pair_mixer_every_n_layers: 2
+  pair_mixer_writeback_scale: 0.1
+  readout_type: hard_clause
+  hard_clause_topk_ratio: 0.1
+  hard_clause_min_topk: 8
