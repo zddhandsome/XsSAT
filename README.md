@@ -1,8 +1,4 @@
-# XsSAT in GeoSATformer
-
-This repository contains the current **XsSAT** codebase for neural CNF satisfiability prediction.
-Although the repository name is still `GeoSATformer`, the active model, training pipeline, and
-paper draft in this workspace are centered on **XsSAT**.
+# XsSAT
 
 XsSAT is a matrix-based neural SAT predictor built around:
 
