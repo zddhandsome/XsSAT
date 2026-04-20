@@ -211,14 +211,6 @@ It enables:
 - polarity pair mixer
 - hard-clause readout
 
-## Paper
-
-Relevant paper files are under [`Paper/`](Paper):
-
-- current LaTeX draft: [`Paper/XsSAT_final_candidate.tex`](Paper/XsSAT_final_candidate.tex)
-- bibliography: [`Paper/references.bib`](Paper/references.bib)
-- latest uploaded PDF snapshot: [`Paper/XsSAT.pdf`](Paper/XsSAT.pdf)
-
 ## Notes
 
 - The repository still contains historical naming traces such as `GeoSATformer` and older
